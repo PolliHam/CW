@@ -37,7 +37,7 @@ CREATE TABLE Attribute(
 --5 Справочник профессий
 CREATE TABLE Profession(
 	id_prof INT IDENTITY(1, 1),								--код профессии
-	name NVARCHAR(15) UNIQUE NOT NULL,						--наименование
+	name NVARCHAR(30) UNIQUE NOT NULL,						--наименование
 	 
 	CONSTRAINT PK_ProfessionId PRIMARY KEY (id_prof)
 );
