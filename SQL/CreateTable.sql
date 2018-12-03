@@ -56,7 +56,7 @@ CREATE TABLE Discipline(
 CREATE TABLE Pulpit(
 	short_name NVARCHAR(10)  NOT NULL,						--сокращённое название
 	full_name NVARCHAR(50) UNIQUE  NOT NULL,				--полное название
-	link NVARCHAR(300)										--ссылки на ресурсы
+	link NVARCHAR(500)										--ссылки на ресурсы
 
 	CONSTRAINT PK_PulpitId PRIMARY KEY (short_name)
 );
@@ -152,7 +152,8 @@ CREATE TABLE GroupStudent(
 	kod_special NVARCHAR(13) NOT NULL,						--код специальности
 	begin_learning DATE NOT NULL,							--начало обучения
 	end_learning DATE NOT NULL,								--конец обучения
-	
+	disband BIT NOT NULL DEFAULT 0						--расформирована? (0-существует, 1-расформирована)
+
 	CONSTRAINT PK_GroupId PRIMARY KEY (id_group),
 	CONSTRAINT FK_Group_To_SubjectCT FOREIGN KEY (kod_special) REFERENCES Speciality (kod_special)
 );
@@ -317,7 +318,7 @@ CREATE TABLE Messenger(
 --27 Справочник языков
 CREATE TABLE Lenguage(
 	short_name NVARCHAR(4) UNIQUE NOT NULL ,				--сокращение
-	full_name NVARCHAR(100) UNIQUE NOT NULL,				--полное название
+	full_name NVARCHAR(20) UNIQUE NOT NULL,				--полное название
 	
 	CONSTRAINT PK_Lenguage PRIMARY KEY (short_name)
 );
