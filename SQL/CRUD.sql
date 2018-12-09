@@ -1,221 +1,5 @@
 SET ANSI_NULLS ON;
 --------------------CRUD---------------------
-
-
-----Enrollment
-IF OBJECT_ID('dbo.EnrollmentSelect') IS NOT NULL
-BEGIN 
-    DROP PROC dbo.EnrollmentSelect 
-END 
-GO
-
-CREATE PROC dbo.EnrollmentSelect
-    @number VARCHAR(15)
-AS 
-	SET XACT_ABORT, NOCOUNT ON
-
-	BEGIN TRAN
-
-	SELECT number, date_sig, signed  
-	FROM   dbo.Enrollment 
-	WHERE  (number = @number OR @number IS NULL) 
-
-	COMMIT
-GO
-
-exec EnrollmentSelect null;
-------------------------------------------------------------
-
-IF OBJECT_ID('dbo.EnrollmentInsert') IS NOT NULL
-BEGIN 
-    DROP PROC dbo.EnrollmentInsert 
-END 
-GO
-
-CREATE PROC dbo.EnrollmentInsert 
-    @number VARCHAR(15),
-    @date_sig DATE,
-	@signed NVARCHAR(15)
-AS 
-	SET XACT_ABORT, NOCOUNT ON
-	
-	BEGIN TRAN
-	
-	INSERT INTO  dbo.Enrollment (number, date_sig, signed)
-			VALUES( @number, @date_sig, @signed)
-	
-	SELECT number, date_sig, signed
-	FROM   dbo.Enrollment
-	WHERE  number = @number
-             
-	COMMIT
-GO
-
-EXEC EnrollmentInsert '2017/18 10-01', '2017-10-01', 'Шиман Д.В.';
-------------------------------------------------------------------------------
-
-IF OBJECT_ID('dbo.EnrollmentUpdate') IS NOT NULL
-BEGIN 
-    DROP PROC dbo.EnrollmentUpdate
-END 
-GO
-
-CREATE PROC dbo.EnrollmentUpdate 
-	@number VARCHAR(15),
-    @numbernew VARCHAR(15),
-    @date_sig DATE,
-	@signed NVARCHAR(15)
-AS 
-	SET XACT_ABORT, NOCOUNT ON
-
-	BEGIN TRAN
-		
-	UPDATE dbo.Enrollment 
-	SET    number = @numbernew, date_sig = @date_sig,  signed = @signed
-	WHERE  number = @number
-	
-	SELECT number, date_sig, signed
-	FROM   dbo.Enrollment 
-	WHERE  number = @numbernew	
-
-	COMMIT
-GO
-
-EXEC EnrollmentUpdate '2017/18 10-01', '2017/18 01-10', '2017-10-01', 'Шиман Д.В.';
-----------------------------------------------------------------------------------
-
-IF OBJECT_ID('dbo.EnrollmentDelete') IS NOT NULL
-BEGIN 
-    DROP PROC dbo.EnrollmentDelete
-END 
-GO
-
-CREATE PROC dbo.EnrollmentDelete 
-   @number VARCHAR(15)
-AS 
-	SET XACT_ABORT, NOCOUNT ON
-	
-	BEGIN TRAN
-
-	DELETE
-	FROM  dbo.Enrollment 
-	WHERE  number = @number
-
-	COMMIT
-GO
-
-exec EnrollmentDelete '2017/18 01-10';
---------------------------------------------------------------------------------
---------------------------------------------------------------------------------
-
-
-----Expelled
-
-IF OBJECT_ID('dbo.ExpelledtSelect') IS NOT NULL
-BEGIN 
-    DROP PROC dbo.ExpelledSelect 
-END 
-GO
-
-CREATE PROC dbo.ExpelledSelect
-    @number VARCHAR(15)
-AS 
-	SET XACT_ABORT, NOCOUNT ON
-
-	BEGIN TRAN
-
-	SELECT number, date_sig, signed  
-	FROM   dbo.Expelled 
-	WHERE  (number = @number OR @number IS NULL) 
-
-	COMMIT
-GO
-
-exec ExpelledSelect null;
-------------------------------------------------------------
-
-IF OBJECT_ID('dbo.ExpelledInsert') IS NOT NULL
-BEGIN 
-    DROP PROC dbo.ExpelledInsert 
-END 
-GO
-
-CREATE PROC dbo.ExpelledInsert 
-    @number VARCHAR(15),
-    @date_sig DATE,
-	@signed NVARCHAR(15)
-AS 
-	SET XACT_ABORT, NOCOUNT ON
-	
-	BEGIN TRAN
-	
-	INSERT INTO  dbo.Expelled (number, date_sig, signed)
-			VALUES( @number, @date_sig, @signed)
-	
-	SELECT number, date_sig, signed
-	FROM   dbo.Expelled
-	WHERE  number = @number
-             
-	COMMIT
-GO
-
-EXEC ExpelledInsert '2017/18 01-10', '2017-10-01', 'Шиман Д.В.';
-------------------------------------------------------------------------------
-
-IF OBJECT_ID('dbo.ExpelledUpdate') IS NOT NULL
-BEGIN 
-    DROP PROC dbo.ExpelledUpdate
-END 
-GO
-
-CREATE PROC dbo.ExpelledUpdate 
-	@number VARCHAR(15),
-    @numbernew VARCHAR(15),
-    @date_sig DATE,
-	@signed NVARCHAR(15)
-AS 
-	SET XACT_ABORT, NOCOUNT ON
-
-	BEGIN TRAN
-		
-	UPDATE dbo.Expelled 
-	SET    number = @numbernew, date_sig = @date_sig,  signed = @signed
-	WHERE  number = @number
-	
-	SELECT number, date_sig, signed
-	FROM   dbo.Expelled
-	WHERE  number = @numbernew	
-
-	COMMIT
-GO
-
-EXEC ExpelledUpdate '2017/18 10-01', '2017/18 01-10', '2017-10-01', 'Шиман Д.В.';
-----------------------------------------------------------------------------------
-
-IF OBJECT_ID('dbo.ExpelledDelete') IS NOT NULL
-BEGIN 
-    DROP PROC dbo.ExpelledDelete
-END 
-GO
-
-CREATE PROC dbo.ExpelledDelete 
-   @number VARCHAR(15)
-AS 
-	SET XACT_ABORT, NOCOUNT ON
-	
-	BEGIN TRAN
-
-	DELETE
-	FROM  dbo.Expelled
-	WHERE  number = @number
-
-	COMMIT
-GO
-
-exec ExpelledDelete '2017/18 01-10';
------------------------------------------------------------------------------------
------------------------------------------------------------------------------------
-
 ----- Mark 
 IF OBJECT_ID('dbo.MarkSelect') IS NOT NULL
 BEGIN 
@@ -226,15 +10,10 @@ GO
 CREATE PROC dbo.MarkSelect
     @id INT
 AS 
-	SET XACT_ABORT, NOCOUNT ON
-
-	BEGIN TRAN
-
-	SELECT id_mark, name, type_mark  
-	FROM   dbo.Mark
-	WHERE  (id_mark = @id OR @id IS NULL) 
-
-	COMMIT
+	SET XACT_ABORT, NOCOUNT ON;
+		SELECT id_mark, name, type_mark  
+		FROM   dbo.Mark
+		WHERE  (id_mark = @id OR @id IS NULL); 
 GO
 
 exec MarkSelect null;
@@ -250,18 +29,20 @@ CREATE PROC dbo.MarkInsert
     @name NVARCHAR(15),
 	@type_mark BIT
 AS 
-	SET XACT_ABORT, NOCOUNT ON
-	
-	BEGIN TRAN
-	
-	INSERT INTO  dbo.Mark ( name, type_mark)
-			VALUES( @name, @type_mark)
-	
-	SELECT id_mark, name, type_mark
-	FROM   dbo.Mark
-	WHERE  id_mark = SCOPE_IDENTITY()
-             
-	COMMIT
+BEGIN TRY
+	SET XACT_ABORT, NOCOUNT ON;
+	BEGIN TRAN;
+		INSERT INTO  dbo.Mark ( name, type_mark)
+				VALUES( @name, @type_mark)
+	COMMIT;
+		SELECT id_mark, name, type_mark
+		FROM   dbo.Mark
+		WHERE  id_mark = SCOPE_IDENTITY();
+END TRY
+BEGIN CATCH
+	ROLLBACK;
+	SELECT ERROR_NUMBER() AS ErrorNumber,ERROR_MESSAGE() AS ErrorMessage;
+END CATCH
 GO
 
 EXEC MarkInsert 'fd', 1;
@@ -278,19 +59,21 @@ CREATE PROC dbo.MarkUpdate
 	@name NVARCHAR(15),
 	@type_mark BIT
 AS 
-	SET XACT_ABORT, NOCOUNT ON
-
-	BEGIN TRAN
-		
-	UPDATE dbo.Mark
-	SET    name=@name, type_mark=@type_mark
-	WHERE  id_mark = @id
-	
-	SELECT id_mark, name, type_mark
-	FROM   dbo.Mark
-	WHERE  id_mark = @id	
-
-	COMMIT
+BEGIN TRY
+	SET XACT_ABORT, NOCOUNT ON;
+	BEGIN TRAN;		
+		UPDATE dbo.Mark
+		SET    name=@name, type_mark=@type_mark
+		WHERE  id_mark = @id;
+	COMMIT;
+		SELECT id_mark, name, type_mark
+		FROM   dbo.Mark
+		WHERE  id_mark = @id;	
+END TRY
+BEGIN CATCH
+	ROLLBACK;
+	SELECT ERROR_NUMBER() AS ErrorNumber,ERROR_MESSAGE() AS ErrorMessage;
+END CATCH
 GO
 
 EXEC MarkUpdate 17, 'dfd', 0;
@@ -305,21 +88,21 @@ GO
 CREATE PROC dbo.MarkDelete 
    @id INT
 AS 
-	SET XACT_ABORT, NOCOUNT ON
-	
-	BEGIN TRAN
-
-	DELETE
-	FROM  dbo.Mark
-	WHERE  id_mark = @id
-
-	COMMIT
+BEGIN TRY
+	SET XACT_ABORT, NOCOUNT ON;
+	BEGIN TRAN;
+		DELETE
+		FROM  dbo.Mark
+		WHERE  id_mark = @id;
+	COMMIT;
+END TRY
+BEGIN CATCH
+	ROLLBACK;
+	SELECT ERROR_NUMBER() AS ErrorNumber,ERROR_MESSAGE() AS ErrorMessage;
+END CATCH
 GO
 
 exec MarkDelete 18;
-------------------------------------------------------------
-------------------------------------------------------------
-
 -----Attribute
 
 IF OBJECT_ID('dbo.AttributeSelect') IS NOT NULL
@@ -329,7 +112,7 @@ END
 GO
 
 CREATE PROC dbo.AttributeSelect
-    @id INT
+    @id INT = NULL
 AS 
 	SET XACT_ABORT, NOCOUNT ON
 
@@ -342,7 +125,7 @@ AS
 	COMMIT
 GO
 
-exec AttributeSelect null;
+exec AttributeSelect ;
 ------------------------------------------------------------
 
 IF OBJECT_ID('dbo.AttributeInsert') IS NOT NULL
@@ -420,308 +203,8 @@ AS
 GO
 
 exec AttributeDelete 10;
--------------------------------------------------------------------
--------------------------------------------------------------------
 
-----Profession
 
-IF OBJECT_ID('dbo.ProfessionSelect') IS NOT NULL
-BEGIN 
-    DROP PROC dbo.ProfessionSelect 
-END 
-GO
-
-CREATE PROC dbo.ProfessionSelect
-    @id INT
-AS 
-	SET XACT_ABORT, NOCOUNT ON
-
-	BEGIN TRAN
-
-	SELECT id_prof, name  
-	FROM   dbo.Profession
-	WHERE  (id_prof = @id OR @id IS NULL) 
-
-	COMMIT
-GO
-
-exec ProfessionSelect null;
-------------------------------------------------------------
-
-IF OBJECT_ID('dbo.ProfessionInsert') IS NOT NULL
-BEGIN 
-    DROP PROC dbo.ProfessionInsert 
-END 
-GO
-
-CREATE PROC dbo.ProfessionInsert 
-    @name NVARCHAR(30)
-AS 
-	SET XACT_ABORT, NOCOUNT ON
-	
-	BEGIN TRAN
-	
-	INSERT INTO  dbo.Profession ( name )
-			VALUES( @name )
-	
-	SELECT id_prof, name
-	FROM   dbo.Profession
-	WHERE  id_prof= SCOPE_IDENTITY()
-             
-	COMMIT
-GO
-------------------------------------------------------------------------------
-
-IF OBJECT_ID('dbo.ProfessionUpdate') IS NOT NULL
-BEGIN 
-    DROP PROC dbo.ProfessionUpdate
-END 
-GO
-
-CREATE PROC dbo.ProfessionUpdate 
-	@id INT,
-	@name NVARCHAR(30)
-AS 
-	SET XACT_ABORT, NOCOUNT ON
-
-	BEGIN TRAN
-		
-	UPDATE dbo.Profession
-	SET    name=@name
-	WHERE  id_prof = @id
-	
-	SELECT id_prof, name
-	FROM   dbo.Profession
-	WHERE  id_prof = @id	
-
-	COMMIT
-GO
-----------------------------------------------------
-
-IF OBJECT_ID('dbo.ProfessionDelete') IS NOT NULL
-BEGIN 
-    DROP PROC dbo.ProfessionDelete
-END 
-GO
-
-CREATE PROC dbo.ProfessionDelete 
-   @id INT
-AS 
-	SET XACT_ABORT, NOCOUNT ON
-	
-	BEGIN TRAN
-
-	DELETE
-	FROM  dbo.Profession
-	WHERE  id_prof = @id
-
-	COMMIT
-GO
----------------------------------------------------------------------
----------------------------------------------------------------------
-
------Discipline
-
-IF OBJECT_ID('dbo.DisciplineSelect') IS NOT NULL
-BEGIN 
-    DROP PROC dbo.DisciplineSelect 
-END 
-GO
-
-CREATE PROC dbo.DisciplineSelect
-    @id INT
-AS 
-	SET XACT_ABORT, NOCOUNT ON
-
-	BEGIN TRAN
-
-	SELECT id_disc, short_name, full_name, link  
-	FROM   dbo.Discipline
-	WHERE  (id_disc = @id OR @id IS NULL) 
-
-	COMMIT
-GO
-
-exec DisciplineSelect null;
-------------------------------------------------------------
-
-IF OBJECT_ID('dbo.DisciplineInsert') IS NOT NULL
-BEGIN 
-    DROP PROC dbo.DisciplineInsert 
-END 
-GO
-
-CREATE PROC dbo.DisciplineInsert 
-	@short_name NVARCHAR(10),
-	@full_name NVARCHAR(50),
-	@link NVARCHAR(500)
-AS 
-	SET XACT_ABORT, NOCOUNT ON
-	
-	BEGIN TRAN
-	
-	INSERT INTO  dbo.Discipline ( short_name, full_name, link)
-			VALUES( @short_name, @full_name, @link )
-	
-	SELECT id_disc, short_name, full_name, link
-	FROM   dbo.Discipline
-	WHERE  id_disc= SCOPE_IDENTITY()
-             
-	COMMIT
-GO
-exec DisciplineInsert 'БД', 'Базы данных', 'https://isit.belstu.by/uchebnaya-rabota/discipliny/bd.html';
-------------------------------------------------------------------------------
-
-IF OBJECT_ID('dbo.DisciplineUpdate') IS NOT NULL
-BEGIN 
-    DROP PROC dbo.DisciplineUpdate
-END 
-GO
-
-CREATE PROC dbo.DisciplineUpdate 
-	@id INT,
-	@short_name NVARCHAR(10),
-	@full_name NVARCHAR(50),
-	@link NVARCHAR(500)
-AS 
-	SET XACT_ABORT, NOCOUNT ON
-
-	BEGIN TRAN
-		
-	UPDATE dbo.Discipline
-	SET    short_name = @short_name, full_name = @full_name, link = @link
-	WHERE  id_disc = @id
-	
-	SELECT id_disc, short_name, full_name, link
-	FROM   dbo.Discipline
-	WHERE  id_disc = @id	
-
-	COMMIT
-GO
-----------------------------------------------------
-
-IF OBJECT_ID('dbo.DisciplineDelete') IS NOT NULL
-BEGIN 
-    DROP PROC dbo.DisciplineDelete
-END 
-GO
-
-CREATE PROC dbo.DisciplineDelete 
-   @id INT
-AS 
-	SET XACT_ABORT, NOCOUNT ON
-	
-	BEGIN TRAN
-
-	DELETE
-	FROM  dbo.Discipline
-	WHERE  id_disc = @id
-
-	COMMIT
-GO
--------------------------------------------------------------------
--------------------------------------------------------------------
-
------Pulpit
-
-IF OBJECT_ID('dbo.PulpitSelect') IS NOT NULL
-BEGIN 
-    DROP PROC dbo.PulpitSelect 
-END 
-GO
-
-CREATE PROC dbo.PulpitSelect
-    @short_name NVARCHAR(10)
-AS 
-	SET XACT_ABORT, NOCOUNT ON
-
-	BEGIN TRAN
-
-	SELECT short_name, full_name, link  
-	FROM   dbo.Pulpit
-	WHERE  (short_name = @short_name OR @short_name IS NULL) 
-
-	COMMIT
-GO
-
-exec PulpitSelect null;
-------------------------------------------------------------
-
-IF OBJECT_ID('dbo.PulpitInsert') IS NOT NULL
-BEGIN 
-    DROP PROC dbo.PulpitInsert 
-END 
-GO
-
-CREATE PROC dbo.PulpitInsert 
-	@short_name NVARCHAR(10),
-	@full_name NVARCHAR(50),
-	@link NVARCHAR(500)
-AS 
-	SET XACT_ABORT, NOCOUNT ON
-	
-	BEGIN TRAN
-	
-	INSERT INTO  dbo.Pulpit ( short_name, full_name, link)
-			VALUES(@short_name, @full_name, @link )
-	
-	SELECT short_name, full_name, link
-	FROM   dbo.Pulpit
-	WHERE  short_name = @short_name
-             
-	COMMIT
-GO
-exec PulpitInsert 'ИСиТ', 'Информационные системы и технологии ', 'https://isit.belstu.by/';
-------------------------------------------------------------------------------
-
-IF OBJECT_ID('dbo.PulpitUpdate') IS NOT NULL
-BEGIN 
-    DROP PROC dbo.PulpitUpdate
-END 
-GO
-
-CREATE PROC dbo.PulpitUpdate 
-	@short_name NVARCHAR(10),
-	@short_name_new NVARCHAR(10),
-	@full_name NVARCHAR(50),
-	@link NVARCHAR(500)
-AS 
-	SET XACT_ABORT, NOCOUNT ON
-
-	BEGIN TRAN
-		
-	UPDATE dbo.Pulpit
-	SET    short_name = @short_name_new, full_name = @full_name, link = @link
-	WHERE  short_name = @short_name
-	
-	SELECT short_name, full_name, link
-	FROM   dbo.Pulpit
-	WHERE  short_name = @short_name_new
-
-	COMMIT
-GO
-----------------------------------------------------
-
-IF OBJECT_ID('dbo.PulpitDelete') IS NOT NULL
-BEGIN 
-    DROP PROC dbo.PulpitDelete
-END 
-GO
-
-CREATE PROC dbo.PulpitDelete 
-	@short_name NVARCHAR(10)
-AS 
-	SET XACT_ABORT, NOCOUNT ON
-	
-	BEGIN TRAN
-
-	DELETE
-	FROM  dbo.Pulpit
-	WHERE  short_name = @short_name
-
-	COMMIT
-GO
-------------------------------------------------------------------
 ------------------------------------------------------------------
 
 ------District

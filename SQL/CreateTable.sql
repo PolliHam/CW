@@ -55,7 +55,7 @@ CREATE TABLE Discipline(
 --7 Перечень кафедр
 CREATE TABLE Pulpit(
 	short_name NVARCHAR(10)  NOT NULL,						--сокращённое название
-	full_name NVARCHAR(50) UNIQUE  NOT NULL,				--полное название
+	full_name NVARCHAR(80) UNIQUE  NOT NULL,				--полное название
 	link NVARCHAR(500)										--ссылки на ресурсы
 
 	CONSTRAINT PK_PulpitId PRIMARY KEY (short_name)
@@ -64,32 +64,16 @@ CREATE TABLE Pulpit(
 --8 Перечень всех преподвавтелей
 CREATE TABLE Teacher(
 	id_teach INT IDENTITY(1, 1),							--код преподавателя
-	short_fio NVARCHAR(10)  NOT NULL,						--сокращённое имя
+	short_fio NVARCHAR(20)  NOT NULL,						--сокращённое имя
 	full_fio NVARCHAR(50)  NOT NULL,						--полное имя
 	pulpit NVARCHAR(10),									--кафедра
 	work BIT NOT NULL,										--работает ли ещё(0-нет, 1-да)
-
+	
 	CONSTRAINT PK_TeacherId PRIMARY KEY (id_teach),
 	CONSTRAINT FK_Teacher_To_Pulpit FOREIGN KEY (pulpit) REFERENCES Pulpit (short_name) ON DELETE SET NULL
 );
 
---9 Ведомости экзаменов и зачётов
-CREATE TABLE ExamCredit(
-	number_statement VARCHAR(10) NOT NULL,					--номер ведомости
-	attribute INT  NOT NULL,								--признак
-	date_sig DATE NOT NULL,									--дата проведения
-	discipline INT  NOT NULL,								--код дисциплины
-	teacher_1 INT NOT NULL,									--код преподавателя
-	teacher_2 INT DEFAULT NULL,								--код второго преподавателя
-	teacher_3 INT DEFAULT NULL,								--код третьего преподавателя
-	
-	CONSTRAINT Pk_ExamCreditNum PRIMARY KEY (number_statement),
-	CONSTRAINT FK_ExamCredit_To_Attribute FOREIGN KEY (attribute) REFERENCES  Attribute (id_atr),
-	CONSTRAINT FK_ExamCredit_To_Discipline FOREIGN KEY (discipline) REFERENCES Discipline (id_disc),
-	CONSTRAINT FK_ExamCredit_To_Teacher1 FOREIGN KEY (teacher_1) REFERENCES Teacher (id_teach),
-	CONSTRAINT FK_ExamCredit_To_Teacher2 FOREIGN KEY (teacher_2) REFERENCES Teacher (id_teach),
-	CONSTRAINT FK_ExamCredit_To_Teacher3 FOREIGN KEY (teacher_3) REFERENCES Teacher (id_teach)
-);
+
 
 --10 Список областей
 CREATE TABLE District(
@@ -152,12 +136,31 @@ CREATE TABLE GroupStudent(
 	kod_special NVARCHAR(13) NOT NULL,						--код специальности
 	begin_learning DATE NOT NULL,							--начало обучения
 	end_learning DATE NOT NULL,								--конец обучения
-	disband BIT NOT NULL DEFAULT 0						--расформирована? (0-существует, 1-расформирована)
+	disband BIT NOT NULL DEFAULT 0						    --расформирована? (0-существует, 1-расформирована)
 
 	CONSTRAINT PK_GroupId PRIMARY KEY (id_group),
 	CONSTRAINT FK_Group_To_SubjectCT FOREIGN KEY (kod_special) REFERENCES Speciality (kod_special)
 );
 
+--9 Ведомости экзаменов и зачётов
+CREATE TABLE ExamCredit(
+	number_statement VARCHAR(10) NOT NULL,					--номер ведомости
+	attribute INT  NOT NULL,								--признак
+	date_sig DATE NOT NULL,									--дата проведения
+	discipline INT  NOT NULL,								--код дисциплины
+	id_group  NVARCHAR(15) NOT NULL,						--код группы
+	teacher_1 INT NOT NULL,									--код преподавателя
+	teacher_2 INT DEFAULT NULL,								--код второго преподавателя
+	teacher_3 INT DEFAULT NULL,								--код третьего преподавателя
+	
+	CONSTRAINT Pk_ExamCreditNum PRIMARY KEY (number_statement),
+	CONSTRAINT FK_ExamCredit_To_Attribute FOREIGN KEY (attribute) REFERENCES  Attribute (id_atr),
+	CONSTRAINT FK_ExamCredit_To_Discipline FOREIGN KEY (discipline) REFERENCES Discipline (id_disc),
+	CONSTRAINT FK_ExamCredit_To_Group FOREIGN KEY (id_group) REFERENCES GroupStudent (id_group),
+	CONSTRAINT FK_ExamCredit_To_Teacher1 FOREIGN KEY (teacher_1) REFERENCES Teacher (id_teach),
+	CONSTRAINT FK_ExamCredit_To_Teacher2 FOREIGN KEY (teacher_2) REFERENCES Teacher (id_teach),
+	CONSTRAINT FK_ExamCredit_To_Teacher3 FOREIGN KEY (teacher_3) REFERENCES Teacher (id_teach)
+);
 
 --16 Список всех студентов
 CREATE TABLE Student(
@@ -165,10 +168,10 @@ CREATE TABLE Student(
 	surname NVARCHAR(15) NOT NULL,							--фамилия
 	first_name NVARCHAR(20) NOT NULL,						--имя
 	patronymic NVARCHAR(15),								--отчество
-	sex NCHAR(1) CHECK (sex in('Ж','М')),					--пол
+	sex NCHAR(1) CHECK (sex in('Ж','М')) NOT NULL,			--пол
 	date_birth DATE NOT NULL,								--дата рождения
 	id_group  NVARCHAR(15) NOT NULL,						--код группы
-	form  NCHAR(1) CHECK (form in('П','Б')),				--форма обучения
+	form  NCHAR(1) CHECK (form in('П','Б')) NOT NULL,		--форма обучения
 	dismissed BIT NOT NULL DEFAULT 0,						--был ли отчислен (0-нет, 1-да)
 	restored BIT NOT NULL DEFAULT 0,						--был ли восстановлен (0-нет, 1-да)
 	leader BIT NOT NULL DEFAULT 0,							--является ли старостой (0-нет, 1-да)
@@ -218,7 +221,7 @@ CREATE TABLE AddressStudent(
 	id_address INT IDENTITY(1, 1),							--id
 	record_book INT NOT NULL,   							--номер зачётной книжки
 	region INT NOT NULL,									--район
-	address_st NVARCHAR(150) NOT NULL,						--адресс
+	[address] NVARCHAR(150) NOT NULL,						--адресс
 	type_addr INT NOT NULL,									--тип адреса
 	
 	CONSTRAINT PK_AddressStudent PRIMARY KEY (id_address),
@@ -231,13 +234,13 @@ CREATE TABLE AddressStudent(
 --21 План дисциплин 
 CREATE TABLE PlanDiscipline(
 	discipline INT NOT NULL,								--дисциплина
-	speciality NVARCHAR(13) NOT NULL,						--специальность
+	speciality NVARCHAR(13) NOT NULL,			 			--специальность
 	semester INT CHECK(semester between 1 and 10),			--семестр
-	total INT NOT NULL ,									--всего часов 
-	lecture INT NOT NULL DEFAULT 0,							--лекции
-	lab INT NOT NULL DEFAULT 0,								--лабораторные 
-	practice INT NOT NULL DEFAULT 0,						--практические
-	seminar INT NOT NULL DEFAULT 0,							--семинары
+	total INT NOT NULL CHECK(total >0) ,					--всего часов 
+	lecture INT NOT NULL DEFAULT 0  CHECK(lecture >0),		--лекции
+	lab INT NOT NULL DEFAULT 0  CHECK(lab >0 ),				--лабораторные 
+	practice INT NOT NULL DEFAULT 0  CHECK(practice >0 ),	--практические
+	seminar INT NOT NULL DEFAULT 0  CHECK(seminar >0 ),		--семинары
 	form INT NOT NULL,										--форма аттестации по окончании(экзамен, зачёт)
 	
 	CONSTRAINT PK_PlanDiscipline PRIMARY KEY (discipline,speciality,semester),
@@ -278,10 +281,10 @@ CREATE TABLE ResultAttestation(
 	discipline INT NOT NULL,								--код дисциплины
 	teacher INT NOT NULL,									--код преподавателя
 	mark INT NOT NULL,										--код оценки
-	hours_absent INT NOT NULL,								--часы пропуска
+	hours_absent INT NOT NULL CHECK(hours_absent >=0),		--часы пропуска
 	form NCHAR(2) CHECK(form IN('ЛЗ','ПЗ','КП')),			--форма 
 	
-	CONSTRAINT PK_ResultAttestation PRIMARY KEY (id_attestation, record_book),
+	CONSTRAINT PK_ResultAttestation PRIMARY KEY (id_attestation, record_book, discipline),
 	CONSTRAINT FK_ResultAttestation_To_Attestation FOREIGN KEY (id_attestation) REFERENCES Attestation(id_attestation),
 	CONSTRAINT FK_ResultAttestation_To_Student FOREIGN KEY (record_book) REFERENCES  Student (record_book),
 	CONSTRAINT FK_ResultAttestation_To_Teacher FOREIGN KEY (teacher) REFERENCES Teacher (id_teach),
@@ -294,8 +297,9 @@ CREATE TABLE Absents(
 	id_abs BIGINT IDENTITY(1,1),		     				--id
 	record_book INT NOT NULL,								--номер зачётной книжки
 	discipline INT NOT NULL,								--код дисциплины
-	form NCHAR(2) CHECK(form IN('ЛК','ЛЗ','ПЗ','КП')),		--форма 
-	date_abs DATE NOT NULL,									--дата
+	form NCHAR(2) CHECK(form IN('ЛК','ЛЗ','ПЗ','КП')) NOT NULL,		--форма 
+	date_abs DATE NOT NULL,											--дата
+	count_hours INT NOT NULL CHECK(count_hours IN(1,2)),	        --количество часов 
 	reason BIT NOT NULL DEFAULT 0,							--причина пропуска(0-неуважительная, 1-уважительная)
 	work_out BIT NOT NULL DEFAULT 0,						--отработано ли занятие(0-нет, 1-да)
 	
@@ -324,29 +328,29 @@ CREATE TABLE Lenguage(
 );
 
 --28 Аттестат
-CREATE TABLE CertificateSt(
+CREATE TABLE [Certificate](
 	number INT NOT NULL,									--регистрационный номер аттестата
-	record_book INT NOT NULL,								--номер зачётной книжки
+	record_book INT NOT NULL UNIQUE,						--номер зачётной книжки
 	school NVARCHAR(50) NOT NULL,							--учереждение образования
-	gpa DECIMAL(2,2) NOT NULL,								--средний балл
-	belarusian_language INT CHECK(belarusian_language between 0 and 10),
-	belarusian_literature INT CHECK(belarusian_literature between 0 and 10),
-	russian_language INT CHECK(russian_language between 0 and 10),
-	russian_literature INT CHECK(russian_literature between 0 and 10),
-	foreign_language INT CHECK(foreign_language between 0 and 10),
-	f_language  NVARCHAR(4),                                 --справочник языков
-	mathematics INT CHECK(mathematics between 0 and 10),
-	informatics INT CHECK(informatics between 0 and 10),
-	history_of_belarus INT CHECK(history_of_belarus between 0 and 10),
-	world_history INT CHECK(world_history between 0 and 10),
-	social_science INT CHECK(social_science between 0 and 10),
-	geography_subj INT CHECK(geography_subj between 0 and 10),
-	biology INT CHECK(biology between 0 and 10),
-	physics INT CHECK(physics between 0 and 10),
-	astronomy INT CHECK(astronomy between 0 and 10),
-	chemistry INT CHECK(chemistry between 0 and 10),
-	physical_culture INT CHECK(physical_culture between 0 and 10),
-	preliminary_medical INT CHECK(preliminary_medical between 0 and 10),
+	gpa FLOAT NOT NULL,										--средний балл
+	belarusian_language INT CHECK(belarusian_language between 0 and 10) NOT NULL,
+	belarusian_literature INT CHECK(belarusian_literature between 0 and 10) NOT NULL,
+	russian_language INT CHECK(russian_language between 0 and 10) NOT NULL,
+	russian_literature INT CHECK(russian_literature between 0 and 10) NOT NULL,
+	foreign_language INT CHECK(foreign_language between 0 and 10) NOT NULL,
+	f_language  NVARCHAR(4) NOT NULL,                                 --справочник языков
+	mathematics INT CHECK(mathematics between 0 and 10) NOT NULL,
+	informatics INT CHECK(informatics between 0 and 10) NOT NULL,
+	history_of_belarus INT CHECK(history_of_belarus between 0 and 10) NOT NULL,
+	world_history INT CHECK(world_history between 0 and 10) NOT NULL,
+	social_science INT CHECK(social_science between 0 and 10) NOT NULL,
+	geography_subj INT CHECK(geography_subj between 0 and 10) NOT NULL,
+	biology INT CHECK(biology between 0 and 10) NOT NULL,
+	physics INT CHECK(physics between 0 and 10) NOT NULL,
+	astronomy INT CHECK(astronomy between 0 and 10) NOT NULL,
+	chemistry INT CHECK(chemistry between 0 and 10) NOT NULL,
+	physical_culture INT CHECK(physical_culture between 0 and 10) NOT NULL,
+	preliminary_medical INT CHECK(preliminary_medical between 0 and 10) NOT NULL,
 	gold_medal BIT NOT NULL DEFAULT 0,						--наличие золотой медали(0-нет, 1-есть)
 	silver_medal BIT NOT NULL  DEFAULT 0,					--наличие серебряной медали(0-нет, 1-есть)
 
@@ -360,12 +364,12 @@ CREATE TABLE CertificateSt(
 CREATE TABLE Parents(
 	id_parent INT IDENTITY(1, 1),							--id родителя
 	record_book INT NOT NULL,								--номер зачётной книжки студента
-	fio NVARCHAR(15) NOT NULL,					     		--фамилия имя отчество
+	fio NVARCHAR(50) NOT NULL,					     		--фамилия имя отчество
 	sex NCHAR(1) CHECK (sex in('Ж','М')),					--пол
 	date_birth DATE NOT NULL,								--дата рождения
 	address_perent NVARCHAR(150) NOT NULL,					--адрес
 	messenger NVARCHAR(50) NOT NULL,						--телефон(ы)
-	proffesion INT NOT NULL,								--номер профессии
+	profession INT NOT NULL,								--номер профессии
 	workplace NVARCHAR(150) NOT NULL,						--место работы
 	post NVARCHAR(30) NOT NULL,								--должность
 
@@ -376,7 +380,8 @@ CREATE TABLE Parents(
 
 --30 Дополнительная инфа о студентах
 CREATE TABLE AdditionalInfo(
-	id_addit INT IDENTITY(1, 1),							--id доп инфы
+	id INT IDENTITY(1, 1),					                --id 
+	academic_year CHAR(9) NOT NULL,							--номер учебного года
 	record_book INT NOT NULL,								--номер зачётной книжки студента
 	hostel BIT  NOT NULL  DEFAULT 0,						--общежитие (0-нет, 1-есть)
 	orphan_state_support  BIT  NOT NULL DEFAULT 0,			--сирота на гос обеспечении (0-нет, 1-есть)
@@ -395,21 +400,21 @@ CREATE TABLE AdditionalInfo(
 	serious_chronic_disease BIT  NOT NULL DEFAULT 0,		--тяжёлое хроническое заболевание (0-нет, 1-есть)
 	activist BIT  NOT NULL DEFAULT 0,						--активист молодёжных общественных организаций (0-нет, 1-есть)
 
-	CONSTRAINT PK_AdditionalInfoId PRIMARY KEY (id_addit),
+	CONSTRAINT PK_AdditionalInfoId PRIMARY KEY (id),
 	CONSTRAINT FK_AdditionalInfo_To_Student FOREIGN KEY (record_book) REFERENCES  Student (record_book)
 );
 
 --31 Отработки неаттестаций
 CREATE TABLE ListNotAttestation(
-	id_notattest INT IDENTITY(1, 1),					    --номер неаттестации
+	id_attestation INT,									    --номер аттестации
 	record_book INT NOT NULL,								--номер зачётной книжки студента
 	discipline INT NOT NULL,								--код дисциплины
 	teacher INT NOT NULL,									--код преподавателя
-	mark INT NOT NULL,										--код оценки
-	date_start DATE NOT NULL,								--дата выдачи листа
+	mark INT ,												--код оценки
 	date_end DATE NOT NULL,									--дата сдачи листа
 
-	CONSTRAINT PK_ListNotAttestationId PRIMARY KEY (id_notattest),
+	CONSTRAINT PK_ListNotAttestationId PRIMARY KEY (id_attestation,record_book,discipline),
+	CONSTRAINT FK_ListNotAttestation_To_Attestation FOREIGN KEY (id_attestation) REFERENCES Attestation (id_attestation),
 	CONSTRAINT FK_ListNotAttestation_To_Discipline FOREIGN KEY (discipline) REFERENCES Discipline (id_disc),
 	CONSTRAINT FK_ListNotAttestation_To_Teacher FOREIGN KEY (teacher) REFERENCES Teacher (id_teach),
 	CONSTRAINT FK_ListNotAttestation_To_Mark FOREIGN KEY (mark) REFERENCES  Mark (id_mark),
@@ -439,12 +444,11 @@ CREATE TABLE EducationalProcess(
 
 --34 Пользователи
 CREATE TABLE Users(
-    id INT IDENTITY(1, 1),					                --id 
-	user_login NVARCHAR(16) UNIQUE NOT NULL,				--логин
+	user_login NVARCHAR(16) NOT NULL,						--логин
 	user_password NVARCHAR(20) NOT NULL,					--пароль
-    user_admin BIT NOT NULL DEFAULT 0,						--не студент?(0-студент, 1-админ)
+    user_admin BIT NOT NULL DEFAULT 0,						--админ?(0-студент, 1-админ)
 
-	CONSTRAINT PK_UsersId PRIMARY KEY (id)
+	CONSTRAINT PK_UsersId PRIMARY KEY (user_login)
 );
 
 
@@ -456,13 +460,13 @@ DROP TABLE Profession;
 DROP TABLE Discipline;
 DROP TABLE Pulpit;
 DROP TABLE Teacher;
-DROP TABLE ExamCredit;
 DROP TABLE District;
 DROP TABLE Region;
 DROP TABLE TypeAddress;
 DROP TABLE SubjectCT;
 DROP TABLE Speciality;
 DROP TABLE GroupStudent;
+DROP TABLE ExamCredit;
 DROP TABLE Student;
 DROP TABLE ResultCT;
 DROP TABLE ListEnrollment;
@@ -475,7 +479,7 @@ DROP TABLE ResultAttestation;
 DROP TABLE Absents;
 DROP TABLE Messenger;
 DROP TABLE Lenguage;
-DROP TABLE CertificateSt;
+DROP TABLE [Certificate];
 DROP TABLE Parents;
 DROP TABLE AdditionalInfo;
 DROP TABLE ListNotAttestation;

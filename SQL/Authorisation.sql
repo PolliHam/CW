@@ -37,7 +37,7 @@ AS BEGIN
 	SET @rc = -1;
 	DECLARE @admin INT;
 	DECLARE @leader INT;
-	IF EXISTS(SELECT id FROM dbo.Users WHERE user_login like @login and user_password like @password)
+	IF EXISTS(SELECT user_login FROM dbo.Users WHERE user_login like @login and user_password like @password)
 	BEGIN							
 		exec dbo.UserIsAdmin @login, @password, @admin out;
 		IF (@admin = 1)
